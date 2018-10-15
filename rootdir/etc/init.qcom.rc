@@ -235,7 +235,7 @@ on boot
     mkdir /persist/data/tz 0700 system system
     mkdir /persist/qc_senseid 0700 system system
     mkdir /persist/bms 0700 root system
-    mkdir /persist/wlan_bt 0700 system system
+    mkdir /persist/wlan_bt 0770 system system
     mkdir /persist/audio 0777 media audio
     mkdir /persist/display 0770 system graphics
     restorecon_recursive /persist
@@ -387,7 +387,7 @@ service ipacm /vendor/bin/ipacm
 service qti /vendor/bin/qti
     class main
     user radio
-    group radio oem_2950 usb
+    group radio oem_2901 diag usb
     writepid /dev/cpuset/system-background/tasks
 
 service sensors /vendor/bin/sensors.qcom
@@ -417,7 +417,7 @@ service wpa_supplicant /vendor/bin/hw/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
     -I/vendor/etc/wifi/wpa_supplicant_overlay.conf \
     -O/data/misc/wifi/sockets -puse_p2p_group_interface=1 \
-    -e/data/misc/wifi/entropy.bin -g@android:wpa_wlan0
+    -g@android:wpa_wlan0
     #   we will start as root and wpa_supplicant will switch to user wifi
     #   after setting up the capabilities required for WEXT
     #   user wifi
@@ -475,30 +475,12 @@ service qcamerasvr /vendor/bin/mm-qcamera-daemon
     group camera system inet input graphics
     writepid /dev/cpuset/system-background/tasks
 
-service charger /charger
-    class charger
-    group system graphics
-    seclabel u:r:charger:s0
-
-service qbcharger /charger -m 1
-    disabled
-    oneshot
-
-on property:sys.qbcharger.enable=true
-    start qbcharger
-
-on property:sys.qbcharger.enable=false
-    stop qbcharger
-
 service msm_irqbalance /vendor/bin/msm_irqbalance -f /vendor/etc/msm_irqbalance.conf
     class core
     user root
     group root
     disabled
     writepid /dev/cpuset/system-background/tasks
-
-on charger
-    setprop persist.sys.usb.config charging
 
 # Start up peripheral manager
 service per_mgr /vendor/bin/pm-service
@@ -611,19 +593,8 @@ on property:init.svc.surfaceflinger=restarting
     stop hwcomposer-2-1
     start hwcomposer-2-1
 
-service energy-awareness /vendor/bin/energy-awareness
-    class main
-    user root
-    group system
-    oneshot
-
 on property:slpi.restart=1
     write /sys/kernel/debug/msm_subsys/slpi restart
-
-service hvdcp_opti /vendor/bin/hvdcp_opti
-    class main
-    user root
-    group system wakelock
 
 service gx_fpd /vendor/bin/gx_fpd
     class late_start
